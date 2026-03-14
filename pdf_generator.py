@@ -157,19 +157,36 @@ def draw_south_indian_chart(c, x, y, size, rashi_grahas, lagna_rashi, title=""):
         c.setFont("Helvetica", 7)
         c.drawString(bx + 2, by + 3, RASHI_NAMES[rashi_idx])
 
-        # Planet abbreviations — vertically centered in the box
+        # Planet abbreviations — wrap within cell boundaries
         planets = rashi_grahas.get(rashi_idx, [])
         if planets:
             c.setFillColor(TEXT_DARK)
-            c.setFont("Helvetica-Bold", 8.5)
-            if len(planets) <= 3:
-                text_y = by + cell_h / 2 - 2
-                c.drawString(bx + 3, text_y, "  ".join(planets))
-            else:
-                mid = len(planets) // 2
-                text_y = by + cell_h / 2 + 4
-                c.drawString(bx + 3, text_y, "  ".join(planets[:mid]))
-                c.drawString(bx + 3, text_y - 11, "  ".join(planets[mid:]))
+            font_name = "Helvetica-Bold"
+            font_size = 8.5
+            c.setFont(font_name, font_size)
+            pad = 3
+            max_w = cell_w - 2 * pad  # usable width inside cell
+            line_h = font_size + 2  # line height with spacing
+
+            # Build wrapped lines: greedily fit abbreviations per line
+            lines = []
+            current_line = []
+            for p in planets:
+                test = "  ".join(current_line + [p])
+                tw = c.stringWidth(test, font_name, font_size)
+                if tw > max_w and current_line:
+                    lines.append("  ".join(current_line))
+                    current_line = [p]
+                else:
+                    current_line.append(p)
+            if current_line:
+                lines.append("  ".join(current_line))
+
+            # Vertically center the block of lines in the cell
+            block_h = len(lines) * line_h
+            start_y = by + cell_h / 2 + block_h / 2 - font_size
+            for i, line in enumerate(lines):
+                c.drawString(bx + pad, start_y - i * line_h, line)
 
     c.setStrokeColor(CHART_BORDER)
     c.setLineWidth(2)

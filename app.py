@@ -291,7 +291,7 @@ if use_manual:
 # ---------------------------------------------------------------------------
 st.markdown("---")
 
-if st.button("Generate Kundali", type="primary", use_container_width=True):
+if st.button("Generate Kundali", type="primary", width='stretch'):
     
     # Validate name
     if not person_name.strip():
@@ -457,7 +457,7 @@ if st.session_state.get('generated', False):
         })
     
     df = pd.DataFrame(planet_data)
-    st.dataframe(df, use_container_width=True, hide_index=True)
+    st.dataframe(df, width='stretch', hide_index=True)
     
     st.markdown('<div class="info-box">The <b>Abbr.</b> column shows the abbreviation used in the chart diagrams below (e.g., Su=Surya, Ch=Chandra). (R) after an abbreviation in the chart means Vakri (retrograde).</div>', unsafe_allow_html=True)
     
@@ -479,7 +479,7 @@ if st.session_state.get('generated', False):
         })
     
     dasha_df = pd.DataFrame(dasha_data)
-    st.dataframe(dasha_df, use_container_width=True, hide_index=True)
+    st.dataframe(dasha_df, width='stretch', hide_index=True)
     
     # Generate PDF
     st.markdown("---")
@@ -495,7 +495,7 @@ if st.session_state.get('generated', False):
         data=pdf_bytes,
         file_name=filename,
         mime="application/pdf",
-        use_container_width=True
+        width='stretch'
     )
     
     st.markdown('<div class="info-box">The PDF includes Rashi Kundali (D1), Navamsha Kundali (D9), planetary positions with chart abbreviations, Panchang details, and Vimshottari Dasha timeline.</div>', unsafe_allow_html=True)
@@ -514,7 +514,7 @@ with st.expander("Rashi & Nakshatra Quick Reference (PDF)"):
         data=ref_pdf,
         file_name="Rashi_Nakshatra_Reference.pdf",
         mime="application/pdf",
-        use_container_width=True
+        width='stretch'
     )
 
 # ---------------------------------------------------------------------------
