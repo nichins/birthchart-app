@@ -180,6 +180,18 @@ NAKSHATRA_NADI = [
     "Adi (Vata)", "Madhya (Pitta)", "Antya (Kapha)"
 ]
 
+# Combustion thresholds (degrees from Surya) — Surya Siddhanta
+COMBUSTION_THRESHOLDS = {
+    "Chandra": 12,
+    "Mangal": 17,
+    "Budha": 14,       # 12 when retrograde
+    "Budha_retro": 12,
+    "Guru": 11,
+    "Shukra": 10,      # 8 when retrograde
+    "Shukra_retro": 8,
+    "Shani": 15
+}
+
 # Exaltation signs (0-indexed rashi)
 EXALTATION = {
     "Surya": 0, "Chandra": 1, "Mangal": 9, "Budha": 5,
@@ -218,6 +230,7 @@ class GrahaPosition:
     nakshatra_lord: str
     pada: int  # 1-4
     is_retrograde: bool
+    is_combust: bool  # True if planet is within combustion distance of Surya
     dignity: str  # "Exalted", "Debilitated", "Own Sign", ""
 
     @property
@@ -594,9 +607,27 @@ def calculate_kundli(
             nakshatra_lord=nak_lord,
             pada=pada,
             is_retrograde=is_retro,
+            is_combust=False,  # Will be set after all positions are calculated
             dignity=dignity
         )
         grahas.append(graha)
+
+    # -----------------------------------------------------------------------
+    # Detect Combustion (Astha) — planet too close to Surya
+    # -----------------------------------------------------------------------
+    sun_lon = grahas[0].longitude  # Surya is index 0
+    for g in grahas:
+        if g.name in COMBUSTION_THRESHOLDS:
+            # Get threshold — use retrograde-specific threshold if applicable
+            if g.is_retrograde and f"{g.name}_retro" in COMBUSTION_THRESHOLDS:
+                threshold = COMBUSTION_THRESHOLDS[f"{g.name}_retro"]
+            else:
+                threshold = COMBUSTION_THRESHOLDS[g.name]
+            # Angular distance between planet and Surya (shortest arc)
+            diff = abs(g.longitude - sun_lon)
+            if diff > 180:
+                diff = 360 - diff
+            g.is_combust = diff < threshold
 
     # -----------------------------------------------------------------------
     # Calculate Lagna (Ascendant)
@@ -623,6 +654,7 @@ def calculate_kundli(
         nakshatra_lord=asc_nak_lord,
         pada=asc_pada,
         is_retrograde=False,
+        is_combust=False,  # Lagna is never combust
         dignity=""
     )
 
@@ -631,7 +663,12 @@ def calculate_kundli(
     # -----------------------------------------------------------------------
     rashi_grahas = {i: [] for i in range(12)}
     for g in grahas:
-        rashi_grahas[g.rashi_index].append(g.abbr + ("(R)" if g.is_retrograde else ""))
+        label = g.abbr
+        if g.is_retrograde:
+            label += "(R)"
+        if g.is_combust:
+            label += "(#)"
+        rashi_grahas[g.rashi_index].append(label)
     # Mark Lagna
     rashi_grahas[asc_rashi_idx].insert(0, "Lg")
 
@@ -860,8 +897,11 @@ def calculate_navamsa(grahas: List[GrahaPosition], lagna: GrahaPosition) -> dict
         navamsa_rashi = (start_sign + navamsa_div) % 12
 
         label = body.abbr
-        if body.name != "Lagna" and body.is_retrograde:
-            label += "(R)"
+        if body.name != "Lagna":
+            if body.is_retrograde:
+                label += "(R)"
+            if body.is_combust:
+                label += "(#)"
         navamsa_map[navamsa_rashi].append(label)
 
     return navamsa_map

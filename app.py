@@ -443,9 +443,10 @@ if st.session_state.get('generated', False):
     planet_data = []
     for g in [kundli.lagna] + kundli.grahas:
         retro = " (Vakri)" if g.is_retrograde else ""
+        combust = " (Astha)" if g.is_combust else ""
         abbrev = GRAHA_ABBREV.get(g.name, "?")
         planet_data.append({
-            "Graha": g.name + retro,
+            "Graha": g.name + retro + combust,
             "Abbr.": abbrev,
             "Rashi": g.rashi_name,
             "Rashi Lord": g.rashi_lord,
@@ -459,7 +460,7 @@ if st.session_state.get('generated', False):
     df = pd.DataFrame(planet_data)
     st.dataframe(df, width='stretch', hide_index=True)
     
-    st.markdown('<div class="info-box">The <b>Abbr.</b> column shows the abbreviation used in the chart diagrams below (e.g., Su=Surya, Ch=Chandra). (R) after an abbreviation in the chart means Vakri (retrograde).</div>', unsafe_allow_html=True)
+    st.markdown('<div class="info-box">The <b>Abbr.</b> column shows the abbreviation used in the chart diagrams below (e.g., Su=Surya, Ch=Chandra). (R) after an abbreviation in the chart means Vakri (retrograde). (#) means Astha (combust).</div>', unsafe_allow_html=True)
     
     # Current Dasha
     st.markdown('<h4 class="section-header">Vimshottari Maha Dasha</h4>', unsafe_allow_html=True)

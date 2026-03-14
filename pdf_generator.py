@@ -444,8 +444,10 @@ def generate_kundli_pdf(kundli: KundliData) -> bytes:
 
     # --- Generation timestamp footnote ---
     from datetime import datetime as _dt
-    _now = _dt.now().strftime("%d %b %Y, %I:%M %p")
     c.setFillColor(TEXT_MED)
+    c.setFont("Helvetica", 8)
+    c.drawRightString(page_width - 20, 30, "Made by M.P. Thriveni, MA  Ph:+91-9480445369")
+    _now = _dt.now().strftime("%d %b %Y, %I:%M %p")
     c.setFont("Helvetica", 6)
     c.drawRightString(page_width - 20, 20, f"Generated on {_now}")
 
@@ -505,11 +507,12 @@ def generate_kundli_pdf(kundli: KundliData) -> bytes:
         c.rect(margin, y_pos - 3, content_width, NIRAYANA_ROW_H, fill=1, stroke=0)
 
         retro_mark = " (R)" if body.is_retrograde else ""
+        combust_mark = " (#)" if body.is_combust else ""
         dignity_str = body.dignity if body.dignity else "-"
         abbrev = GRAHA_ABBREV.get(body.name, "?")
 
         row_data = [
-            body.name + retro_mark, abbrev, body.rashi_name,
+            body.name + retro_mark + combust_mark, abbrev, body.rashi_name,
             body.rashi_lord, body.degree_str, body.nakshatra_name,
             body.nakshatra_lord, str(body.pada), dignity_str
         ]
@@ -531,7 +534,7 @@ def generate_kundli_pdf(kundli: KundliData) -> bytes:
     y_pos -= 10
     c.setFont("Helvetica-Oblique", FONT_SMALL_NOTE)
     c.setFillColor(TEXT_MED)
-    c.drawString(margin, y_pos, "Abbr. = chart label.  (R) = Vakri (retrograde).")
+    c.drawString(margin, y_pos, "Abbr. = chart label.  (R) = Vakri (retrograde).  (#) = Astha (combust).")
 
     # --- Gold line ---
     y_pos -= 6
@@ -665,8 +668,10 @@ def generate_kundli_pdf(kundli: KundliData) -> bytes:
 
     # --- Generation timestamp footnote ---
     from datetime import datetime as _dt
-    _now = _dt.now().strftime("%d %b %Y, %I:%M %p")
     c.setFillColor(TEXT_MED)
+    c.setFont("Helvetica", 8)
+    c.drawRightString(page_width - 20, 30, "Made by M.P. Thriveni, MA  Ph:+91-9480445369")
+    _now = _dt.now().strftime("%d %b %Y, %I:%M %p")
     c.setFont("Helvetica", 6)
     c.drawRightString(page_width - 20, 20, f"Generated on {_now}")
 
